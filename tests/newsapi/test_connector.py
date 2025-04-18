@@ -30,22 +30,24 @@ async def news_api_connector():
 
 
 @pytest.mark.asyncio
-async def test_search_everything_live(news_api_connector):
+async def test_search_everything(news_api_connector):
     """Test search_everything method with a real API call."""
     # Calculate dates for a recent time period (last 7 days)
     today = datetime.now()
     from_date = (today - timedelta(days=7)).strftime("%Y-%m-%d")
     to_date = today.strftime("%Y-%m-%d")
 
-    success, result = await news_api_connector.search_everything(
-        query="technology",
-        from_date=from_date,
-        to_date=to_date,
-        language="en",
-        sort_by="publishedAt",
-        page_size=5,
-        page=1,
-    )
+    params = {
+        "q": "technology",
+        "from": from_date,
+        "to": to_date,
+        "language": "en",
+        "sortBy": "publishedAt",
+        "pageSize": 5,
+        "page": 1,
+    }
+
+    success, result = await news_api_connector.search_everything(**params)
 
     assert success is True, f"API call failed with error: {result}"
     assert isinstance(result, ArticleResponse)
@@ -63,41 +65,19 @@ async def test_search_everything_live(news_api_connector):
 
 
 @pytest.mark.asyncio
-async def test_get_top_headlines_live(news_api_connector):
-    """Test get_top_headlines method with a real API call."""
-    # Make the actual API call
-    success, result = await news_api_connector.get_top_headlines(
-        country="us",
-        category="technology",
-        page_size=5,
-        page=1,
-    )
-
-    assert success is True, f"API call failed with error: {result}"
-    assert isinstance(result, ArticleResponse)
-    assert result.status == "ok"
-    assert result.totalResults > 0
-    assert len(result.articles) > 0
-
-    article = result.articles[0]
-    assert article.source is not None
-    assert article.title is not None
-    assert article.url is not None
-
-    print(f"\nFound {result.totalResults} top headlines in technology")
-    print(f"First headline: '{article.title}' from {article.source.name}")
-
-
-@pytest.mark.asyncio
 async def test_search_everything_with_specific_query(news_api_connector):
     """Test searching for articles about a specific topic."""
-    success, result = await news_api_connector.search_everything(
-        query="artificial intelligence research",
-        from_date=(datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d"),
-        language="en",
-        sort_by="relevancy",
-        page_size=5,
-    )
+
+    params = {
+        "q": "artificial intelligence research",
+        "from": (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d"),
+        "language": "en",
+        "sortBy": "relevancy",
+        "pageSize": 5,
+        "page": 1,
+    }
+
+    success, result = await news_api_connector.search_everything(**params)
 
     assert success is True, f"API call failed with error: {result}"
     assert isinstance(result, ArticleResponse)
@@ -123,6 +103,34 @@ async def test_search_everything_with_specific_query(news_api_connector):
         print(f"\nFirst AI research article: '{article.title}'")
         if article.description:
             print(f"Description: {article.description[:100]}...")
+
+
+@pytest.mark.asyncio
+async def test_get_top_headlines(news_api_connector):
+    """Test get_top_headlines method with a real API call."""
+
+    params = {
+        "country": "us",
+        "category": "technology",
+        "pageSize": 5,
+        "page": 1,
+    }
+
+    success, result = await news_api_connector.get_top_headlines(**params)
+
+    assert success is True, f"API call failed with error: {result}"
+    assert isinstance(result, ArticleResponse)
+    assert result.status == "ok"
+    assert result.totalResults > 0
+    assert len(result.articles) > 0
+
+    article = result.articles[0]
+    assert article.source is not None
+    assert article.title is not None
+    assert article.url is not None
+
+    print(f"\nFound {result.totalResults} top headlines in technology")
+    print(f"First headline: '{article.title}' from {article.source.name}")
 
 
 @pytest.mark.asyncio
