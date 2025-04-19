@@ -27,7 +27,7 @@ class Article(BaseModel):
     content: str | None
 
 
-class ArticleResponse(BaseModel):
+class NewsResponse(BaseModel):
     """Represents a response from the NewsAPI containing articles."""
 
     model_config = ConfigDict(alias_generator=to_camel, populate_by_name=True)
@@ -35,22 +35,3 @@ class ArticleResponse(BaseModel):
     status: str
     totalResults: int
     articles: list[Article]
-
-
-# class SourceDetails(BaseModel):
-#    """Represents detailed information about a news source."""
-#
-#    id: str
-#    name: str
-#    description: str
-#    url: HttpUrl
-#    category: str
-#    language: str
-#    country: str
-
-
-# class SourcesResponse(BaseModel):
-#    """Represents a response from the NewsAPI containing sources."""
-#
-#    status: str
-#    sources: List[SourceDetails]

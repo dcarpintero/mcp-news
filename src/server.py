@@ -1,15 +1,15 @@
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Union
+from typing import Optional
 
 from mcp.server.fastmcp import FastMCP, Context
 from dotenv import load_dotenv
 
 from newsapi.connector import NewsAPIConnector
-from newsapi.models import ArticleResponse
+from newsapi.models import NewsResponse
 
 load_dotenv()
 
-mcp = FastMCP("News Server", dependencies=["httpx", "python-dotenv"])
+mcp = FastMCP("News Server")
 news_api_connector = NewsAPIConnector()
 
 
@@ -23,7 +23,7 @@ async def fetch_news(
     page_size: int = 10,
     page: int = 1,
     ctx: Context = None,
-) -> ArticleResponse:
+) -> NewsResponse:
     """
     Retrieves news articles.
 
@@ -41,12 +41,12 @@ async def fetch_news(
         News Articles
     """
     if not is_valid_date(from_date):
-        return error_response("Error: Invalid 'from_date' format. Use YYYY-MM-DD.")
+        return error_response("Invalid 'from_date' format. Use YYYY-MM-DD.")
     if not is_valid_date(to_date):
-        return error_response("Error: Invalid 'to_date' format. Use YYYY-MM-DD.")
+        return error_response("Invalid 'to_date' format. Use YYYY-MM-DD.")
     if not is_valid_sort_by(sort_by):
         return error_response(
-            "Error: invalid 'sort_by' value. Use 'relevancy', 'popularity', or 'publishedAt'."
+            "Invalid 'sort_by' value. Use 'relevancy', 'popularity', 'publishedAt'."
         )
 
     if ctx:
@@ -67,20 +67,22 @@ async def fetch_news(
     }
 
     success, result = await news_api_connector.search_everything(**params)
+    if not success:
+        return error_response("Failed to fetch news articles.")
     return result
 
 
 @mcp.tool()
-async def fetch_top_headlines(
+async def fetch_headlines(
     category: str,
     query: str,
     country: str = "us",
     page_size: int = 10,
     page: int = 1,
     ctx: Context = None,
-) -> ArticleResponse:
+) -> NewsResponse:
     """
-    Retrieves top headlines.
+    Retrieves headlines news.
 
     Args:
         category: Optional category (e.g., business, entertainment, health, science, sports, technology)
@@ -111,6 +113,8 @@ async def fetch_top_headlines(
     }
 
     success, result = await news_api_connector.get_top_headlines(**params)
+    if not success:
+        return error_response("Failed to fetch headlines.")
     return result
 
 
@@ -150,11 +154,11 @@ def is_valid_category(category: str) -> bool:
     ]
 
 
-def error_response(message: str) -> ArticleResponse:
+def error_response(message: str) -> NewsResponse:
     """
     Create an error response.
     """
-    return ArticleResponse(status="error", message=message, articles=[], totalResults=0)
+    return NewsResponse(status="error", message=message, articles=[], totalResults=0)
 
 
 if __name__ == "__main__":

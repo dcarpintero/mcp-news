@@ -2,7 +2,7 @@ import os
 import httpx
 from datetime import datetime
 from typing import Dict, List, Optional, Any, Union, Tuple, cast
-from .models import ArticleResponse, Article, ArticleSource
+from .models import NewsResponse, Article, ArticleSource
 
 
 class NewsAPIConnector:
@@ -25,7 +25,7 @@ class NewsAPIConnector:
 
     async def search_everything(
         self, **kwargs
-    ) -> Tuple[bool, Union[str, ArticleResponse]]:
+    ) -> Tuple[bool, Union[str, NewsResponse]]:
         """
         Retrieves News Articles from the NewsAPI "/everything" endpoint.
 
@@ -35,7 +35,7 @@ class NewsAPIConnector:
         Returns:
             A tuple containing (success, result) where:
             - success: A boolean indicating if the request was successful
-            - result: Either an error message (string) or the validated ArticleResponse model
+            - result: Either an error message (string) or the validated NewsResponse model
         """
         async with await self.get_client() as client:
             params = kwargs
@@ -43,9 +43,9 @@ class NewsAPIConnector:
                 response = await client.get(f"{self.base_url}everything", params=params)
                 response.raise_for_status()
                 data = response.json()
-                article_response = ArticleResponse.model_validate(data)
+                result = NewsResponse.model_validate(data)
 
-                return True, article_response
+                return True, result
 
             except httpx.RequestError as e:
                 return False, f"Request error: {str(e)}"
@@ -55,7 +55,7 @@ class NewsAPIConnector:
 
     async def get_top_headlines(
         self, **kwargs
-    ) -> Tuple[bool, Union[str, ArticleResponse]]:
+    ) -> Tuple[bool, Union[str, NewsResponse]]:
         """
         Retrieves Top-Headlines Articles from the NewsAPI "/top-headlines" endpoint.
 
@@ -65,7 +65,7 @@ class NewsAPIConnector:
         Returns:
             A tuple containing (success, result) where:
             - success: A boolean indicating if the request was successful
-            - result: Either an error message (string) or the validated ArticleResponse model
+            - result: Either an error message (string) or the validated NewsResponse model
         """
         async with await self.get_client() as client:
             params = kwargs
@@ -75,8 +75,8 @@ class NewsAPIConnector:
                 )
                 response.raise_for_status()
                 data = response.json()
-                article_response = ArticleResponse.model_validate(data)
-                return True, article_response
+                result = NewsResponse.model_validate(data)
+                return True, result
 
             except httpx.RequestError as e:
                 return False, f"Request error: {str(e)}"
