@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, HttpUrl
+from pydantic import BaseModel, ConfigDict, HttpUrl
 from pydantic.alias_generators import to_camel
 
 
@@ -22,8 +22,8 @@ class Article(BaseModel):
     title: str | None
     description: str | None
     url: HttpUrl | None
-    urlToImage: HttpUrl | None
-    publishedAt: datetime | None
+    url_to_image: HttpUrl | None
+    published_at: datetime | None
     content: str | None
 
 
